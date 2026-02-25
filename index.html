@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday Anika!</title>
+<style>
+  body { text-align: center; font-family: Arial, sans-serif; background: #ffe6f0; }
+  h1 { margin-top: 50px; color: #d63384; }
+  #cake { position: relative; width: 200px; height: 180px; margin: 50px auto; }
+  .layer { width: 200px; height: 50px; margin: 0 auto; border-radius: 10px; position: relative; }
+  .layer1 { background: #fff0f5; z-index: 3; }
+  .layer2 { background: #ffd1dc; top: -10px; z-index: 2; }
+  .layer3 { background: #ffe6f0; top: -20px; z-index: 1; }
+  .candle { width: 10px; height: 30px; background: #ffeb3b; position: absolute; top: -35px; border-radius: 3px; }
+  .flame { width: 6px; height: 12px; background: orange; border-radius: 50%; position: absolute; top: -12px; left: 2px; animation: flicker 0.2s infinite; }
+  @keyframes flicker { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+  #message { display: none; font-size: 20px; margin-top: 30px; color: #d63384; }
+</style>
+</head>
+<body>
+
+<h1>Happy Birthday Anika!</h1>
+
+<div id="cake">
+  <div class="layer layer3"></div>
+  <div class="layer layer2"></div>
+  <div class="layer layer1"></div>
+  <div class="candle" style="left:40px"><div class="flame"></div></div>
+  <div class="candle" style="left:95px"><div class="flame"></div></div>
+  <div class="candle" style="left:150px"><div class="flame"></div></div>
+</div>
+
+<div id="message">Happy Birthday, Dost! May Allah grant all your wishes and bless you with endless happiness.</div>
+
+<script>
+let blown = false;
+
+function blowOut() {
+  if (blown) return;
+  blown = true;
+  const flames = document.querySelectorAll('.flame');
+  flames.forEach(f => f.style.display = 'none');
+  document.getElementById('message').style.display = 'block';
+  confettiEffect();
+}
+
+function confettiEffect() {
+  const confettiCount = 100;
+  for (let i = 0; i < confettiCount; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.width = '8px';
+    confetti.style.height = '8px';
+    confetti.style.background = ['#ff3f81','#ffcf40','#3fd1ff','#ff6b3f'][Math.floor(Math.random()*4)];
+    confetti.style.position = 'absolute';
+    confetti.style.top = '0px';
+    confetti.style.left = Math.random()*window.innerWidth + 'px';
+    confetti.style.opacity = 0.9;
+    confetti.style.borderRadius = '50%';
+    document.body.appendChild(confetti);
+    let fall = 0;
+    const interval = setInterval(() => {
+      fall += 5;
+      confetti.style.top = fall + 'px';
+      if (fall > window.innerHeight) { confetti.remove(); clearInterval(interval); }
+    }, 20);
+  }
+}
+
+// Listen to mic/blow
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    function checkBlow() {
+      analyser.getByteTimeDomainData(dataArray);
+      let max = Math.max(...dataArray);
+      if (max > 200) { // detect loud blow
+        blowOut();
+      }
+      requestAnimationFrame(checkBlow);
+    }
+    checkBlow();
+  }).catch(e => console.log('Microphone access denied'));
+}
+</script>
+
+</body>
+</html>
